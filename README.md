@@ -45,7 +45,7 @@ We should observe status "PASS" in green at the end of experiments as below
 ![alter](./documents/minimal_exp.PNG)
 
 ## Run the expriment in actual distributed environment
-In this section, you can reproduce all results in the paper in the real environment, which is mainly for badges `Results Reproduced`. The following `Experiment-2` are the major claim we made in the paper. We also provide the detailed instructions to reproduce other results reported in the paper for other researchers.
+In this section, you can reproduce all results in the paper in the real environment, which is mainly for badges `Results Reproduced`. **The following `Experiment-2` are the major claim we made in the paper**. We also provide the detailed instructions to reproduce other results reported in the paper for other researchers.
 
 ### Hardware preparation
 To reproduce the results in Rolis, we need
