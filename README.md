@@ -91,7 +91,7 @@ python3 scripts/extractor.py 0 silo-only-logs "agg_throughput:" "ops/sec"
 ```
 
 ### Experiment-2: Throughput of Rolis on TPC-C benchmark (Figure-10-a)
-* compile the program
+* compile the program on the leader replica
 ```bash
 # on the leader replica
 # re-compile
@@ -104,14 +104,20 @@ bash ./batch_silo.sh kill
 bash ./batch_silo.sh scp
 ```
 * run the experiments on three replicas separately one by one
+
+on the leader replica: 10.1.0.7 
 ```bash
-# on the leader replica: 10.1.0.7, this process will stop after completion
+# this process will stop after completion
 ulimit -n 10000 && python3 scripts/leader_b.py 1 31 1
-
-# on the p2 follower replica: 10.1.0.9, this process will stop after completion
+```
+on the p2 follower replica: 10.1.0.9
+```bash
+# , this process will stop after completion
 ulimit -n 10000 && python3 scripts/follower_b2.py 1 31 1
-
-# on the p1 follower replica: 10.1.0.8, this process will stop after completion
+```
+on the p1 follower replica: 10.1.0.8
+```
+# this process will stop after completion
 ulimit -n 10000 && python3 scripts/follower_b1.py 1 31 1
 ```
 The order of execution matters, executing the command on the p2 follower replica at first as above. In this experiment, we conduct an experiment to get the performance of Rolis on TPC-C benchmark by varying the number of CPU cores. Each run would take 1 minute, thus it will run up to 31 minutes (31 * 1 minute). We redirect all results into the folder `xxxx15`, thus you can obtain the performance numbers from 1 ~ 31 CPU cores, by
