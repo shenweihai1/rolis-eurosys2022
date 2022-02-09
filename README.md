@@ -22,6 +22,7 @@ We run all our codes on `ubuntu 18.04` which mainly depends on several Linux lib
 ```bash
 cd ~
 git clone https://github.com/shenweihai1/rolis-eurosys2022.git
+cd ~/rolis-eurosys2022
 cd ./docker
 bash docker.sh
 ```
@@ -53,7 +54,7 @@ To reproduce the results in Rolis, we need
 - obtain the IP of 3 machines.
 
 ### Download code and install dependencies
-Let's assume here, `10.1.0.7` is the leader replica, `10.1.0.8` serves as the p1 follower replica and `10.1.0.9` serves as the p2 follower replica.
+Let's assume here, `10.1.0.7` is the leader replica, `10.1.0.8` serves as the p1 follower replica and `10.1.0.9` serves as the p2 follower replica. Run all following commands on the leader replica.
 ```bash
 # on the leader replica 
 cd ~
@@ -73,8 +74,9 @@ cd ~/rolis-eurosys2022
 make paxos
 ```
 
-### Sync modifications to two other replicas via ssh
+### Sync modifications to two other replicas via ssh (still run this command the leader replica)
 ```bash
+cd ~/rolis-eurosys2022
 bash ./batch_silo.sh scp
 ```
 At this moment, the running environment on 3 replicas is ready. 
@@ -112,11 +114,11 @@ ulimit -n 10000 && python3 scripts/leader_b.py 1 31 1
 ```
 on the p2 follower replica: 10.1.0.9
 ```bash
-# , this process will stop after completion
+# this process will stop after completion
 ulimit -n 10000 && python3 scripts/follower_b2.py 1 31 1
 ```
 on the p1 follower replica: 10.1.0.8
-```
+```bash
 # this process will stop after completion
 ulimit -n 10000 && python3 scripts/follower_b1.py 1 31 1
 ```
@@ -124,7 +126,7 @@ The order of execution matters, executing the command on the p2 follower replica
 ```bash
 python3 scripts/extractor.py 0 xxxx15 "agg_throughput:" "ops/sec"
 ```
-The major results would like below, Rolis can achieve about 1.259M throughput on 32 cores.
+The major results would like below, Rolis can achieve about 1.259M (the number claimed in the paper is 1.24M, you should observe a similar number which depends on the servers) throughput on 32 cores.
 ![alter](./documents/major_claim.PNG)
 
 ### Experiment-3: Silo-only on YCSB++ (Figure-10-b)
