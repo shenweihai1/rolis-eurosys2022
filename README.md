@@ -55,8 +55,16 @@ We provide one-click runnable to generate all results under folder `./results`. 
 cd ~/rolis-eurosys2022
 bash one-click.sh
 ```
+### case 1: run chosen experiments
 The one-click script usually can complete all experiments till the end, but everything can happen. In this case, you don't have to re-run completed experiments. You can comment the completed experiments and run the incompleted ones in the `one-click.sh`. For example, you can only run `experiment-8` as below
 ![alt](./documents/one-click.png)
+
+### case 2: run the experiment with chosen worker threads
+For example, in the following experiment-4, numbers for worker threads 13-15 are missing. You can re-run the experiment with chosen worker threads by configuration in the `one-click.sh`.
+![alt](./documents/case2.png)
+
+
+
 
 You can find a more detailed experiment instructions in [experiments](./instructions.md).
 
