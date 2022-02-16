@@ -150,10 +150,12 @@ void start_Silo_workers_micro(abstract_db *db, int threads_nums, int argc, strin
         micro_argv[i] = (char *) bench_toks[i - 1].c_str();
     bench_runner *R = rsimple_do_test(db, micro_argc, micro_argv);
 
+#if !defined(LOG_TO_FILE) && defined(PAXOS_LIB_ENABLED)
     // send the ending signal
     std::string endLogInd = "";
     for (int i = 0; i < threads_nums; i++)
         add_log_to_nc((char *) endLogInd.c_str(), 0, i);
+#endif
 
     // wait for all acknowledges
 #if defined(ALLOW_WAIT_AT_PAXOS_END) && defined(PAXOS_LIB_ENABLED)
