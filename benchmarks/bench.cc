@@ -535,7 +535,11 @@ bench_runner::run_without_stats()
       uint64_t n_commits_5 = 0 ;
       uint64_t n_commits_25 = 0 ;
       if (run_mode == RUNMODE_TIME) {
-          bool fail = false;  // change it to true to mimic termination
+          #if defined(FAIL_OVER_VARIABLE)
+              bool fail = true;
+          #else
+              bool fail = false;
+          #endif
           for(uint64_t i=0; i<runtime*10; i++) {
               usleep(100000);
               if (fail && i == 10*10) {
