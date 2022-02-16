@@ -524,8 +524,7 @@ main(int argc, char **argv) {
 #endif
 
   register_sync_util([&]() {
-    //return get_epoch();
-    return 1;
+    return get_epoch();
   });
 
   register_leader_election_callback([&]() {
