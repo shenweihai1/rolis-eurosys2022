@@ -166,7 +166,7 @@ bash ./batch_silo.sh scp
 
 In order to terminate the leader replica at the second 10, thus 
 we manually modify variable `fail` from false to true to mimic the termination in `./benchmarks/bench.cc`.
-![alter](./documents/diff-1.PNG)
+![alter](./documents/diff-1.png)
 
 Then, we recompile it again 
 ```bash
