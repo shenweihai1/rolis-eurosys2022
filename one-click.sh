@@ -11,6 +11,7 @@ start=1
 end=31
 
 setup () {
+    bash ./batch_silo.sh kill
     mkdir -p results
     #rm ./results/*
 }
