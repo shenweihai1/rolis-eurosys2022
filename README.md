@@ -151,7 +151,8 @@ Then get the numbers by,
 ```bash
 python3 scripts/extractor.py 0 xxxx15_micro "agg_throughput:" "ops/sec"
 ```
-Rolis can achieve about ~10M reported in the paper throughput on 32 cores.
+Rolis can achieve about ~10M reported in the paper throughput on 32 cores. As below (I only run it with 31 worker threads), the throughput is `9.724M`.
+![alter](./documents/exp4-results.png)
 
 ### Experiment-5 (Figure-11):
 All numbers in `Figure-11` is  reciprocal of ones from `Figure-10`.
@@ -197,19 +198,24 @@ sudo ./b1.sh 16
 tail -f ./xxxx15/*
 ```
 
-Lastly, we can obtain numbers via
+Wait for either follower-1 or follower-2 to complete the job which depends on whom is going to be elected as the new leader.
+![alt](./documents/failover-follower.png)
+
+Lastly, we can obtain numbers on the leader replica via
 ```bash
-# on the leader replica
 # copy logs from remote machines
 ./batch_silo.sh copy_remote_file ./xxxx15/follower-16.log  && mv p1p2.log ./scripts/failure_follower && cp ./xxxx15/leader-16-1000.log ./scripts/failure_leader
 
 cd ./scripts && python failure_cal.py
 ```
+the results are the throughput changes over the time
+![alter](./documents/exp6-results.png)
 
 ### Experiment-7: latency ovar different batch-sizes (Figure-16)
 In this experiment, we'll fix the number of worker threads while varying the batch-size of transactions. At first, compile the system
 ```bash
 # on the leader replica
+git checkout benchmarks/bench.cc  # revert the changes made in the fail-over experiment
 bash ./multi-latency.sh
 bash ./batch_silo.sh scp
 bash ./batch_silo.sh kill
@@ -222,6 +228,7 @@ After that, you can get all the latency numbers via
 ```
 ag '% latency' xxxx15
 ```
+![alt](./documents/exp7-results.png)
 
 ### Experiment-8: Throughput over different batch-sizes (Figure-16)
 Let's we stop tracking latency and record the throughput of Rolis over different batch-sizes. It's similar to Experiment-7. At first, compile the system
@@ -239,6 +246,7 @@ After that, you can get all latency numbers via
 ```
 ag 'agg_throughput: ' xxxx15
 ```
+![alt](./documents/exp8-results.png)
 
 ## References
 * Eurosys badges: https://sysartifacts.github.io/eurosys2022/badges

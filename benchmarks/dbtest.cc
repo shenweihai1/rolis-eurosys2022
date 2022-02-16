@@ -524,7 +524,7 @@ main(int argc, char **argv) {
 #endif
 
   register_sync_util([&]() {
-    #if defined(DFAIL_OVER)
+    #if defined(FAIL_OVER)
         return get_epoch();
     #else
         return 1;
