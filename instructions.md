@@ -73,7 +73,20 @@ Rolis can achieve about ~10M reported in the paper throughput on 32 cores. As be
 ![alter](./documents/exp4-results.png)
 
 ### Experiment-5 (Figure-11):
-All numbers in `Figure-11` is  reciprocal of ones from `Figure-10`.
+All numbers in `Figure-11` is ones from `Figure-10` divide by the number of worker threads. For example, if you get numbers for Figure-10a-Silo as below
+```
+1 a1
+2 a2
+...
+31 a31
+```
+then the Figure-10a-Silo will be
+```
+1 a1/1
+2 a2/2
+...
+31 a31/31
+```
 
 ### Experiment-6: Failover (Figure-14)
 At first, we recompile it
