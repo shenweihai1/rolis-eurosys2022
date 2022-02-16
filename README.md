@@ -151,31 +151,53 @@ Then get the numbers by,
 ```bash
 python3 scripts/extractor.py 0 xxxx15_micro "agg_throughput:" "ops/sec"
 ```
+Rolis can achieve about ~10M reported in the paper throughput on 32 cores.
 
 ### Experiment-5 (Figure-11):
 All numbers in `Figure-11` is  reciprocal of ones from `Figure-10`.
 
 ### Experiment-6: Failover (Figure-14)
-In this experiment, we terminate the leader replica at the second 10, thus we manually modify variable `fail` from false to true to mimic the termination in `./benchmarks/bench.cc`. Then, we recompile it
-```bash
-# on the leader replica
-bash ./multi.sh
+At first, we recompile it
 ```
-Now, let's run the failover experiment
+bash ./multi-failover.sh
+bash ./batch_silo.sh kill
+bash ./batch_silo.sh scp
+```
+
+In order to terminate the leader replica at the second 10, thus 
+we manually modify variable `fail` from false to true to mimic the termination in `./benchmarks/bench.cc`.
+![alter](./documents/diff-1.PNG)
+
+Then, we recompile it again 
 ```bash
 # on the leader replica
+bash ./multi-failover.sh
+```
+
+* run the experiments on three replicas separately one by one
+
+on the leader replica: 10.1.0.7 
+```bash
+# this process will stop after completion
+ulimit -n 10000 
 sudo ./b0.sh 16
 tail -f ./xxxx15/*
-
-# on the p1 follower replica
-sudo ./b1.sh 16
-tail -f ./xxxx15/*
-
-# on the p2 follower replica
+```
+on the p2 follower replica: 10.1.0.9
+```bash
+ulimit -n 10000
 sudo ./b2.sh 16
 tail -f ./xxxx15/*
 ```
-Then, we can obtain numbers via
+on the p1 follower replica: 10.1.0.8
+```bash
+# this process will stop after completion
+ulimit -n 10000
+sudo ./b1.sh 16
+tail -f ./xxxx15/*
+```
+
+Lastly, we can obtain numbers via
 ```bash
 # on the leader replica
 # copy logs from remote machines

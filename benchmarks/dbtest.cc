@@ -524,7 +524,11 @@ main(int argc, char **argv) {
 #endif
 
   register_sync_util([&]() {
-    return get_epoch();
+    #if defined(DFAIL_OVER)
+        return get_epoch();
+    #else
+        return 1;
+    #endif
   });
 
   register_leader_election_callback([&]() {
