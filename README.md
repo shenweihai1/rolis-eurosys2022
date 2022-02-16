@@ -47,9 +47,12 @@ We should observe status "PASS" in green at the end of experiments as below
 
 ## Run the expriment in actual distributed environment
 
-We provide one-click runnable to generate all results under folder `./results` 
+We provide one-click runnable to generate all results under folder `./results`. It would take up to 2 ~ 3 hours to run all experiments.
 ```bash
 cd ~/rolis-eurosys2022
 bash one-click.sh
 ```
-You can find a more detailed instructions in [modules](./instructions.md).
+The one-click script usually can complete all experiments till the end, but everything can happen. In this case, you don't have to re-run completed experiments. You can comment the completed experiments and run the incompleted ones in the `one-click.sh`. For example, you can only run `experiment-8` as below
+![alt](./documents/one-click.png)
+
+You can find a more detailed instructions in [experiments](./instructions.md).

@@ -5,12 +5,14 @@ leadrIP=$( cat ./scripts/ip_leader_replica )
 p1=$( cat ./scripts/ip_p1_follower_replica )
 p2=$( cat ./scripts/ip_p2_follower_replica )
 ulimit -n 10000
-start=31
+# minimum of the number of worker threads
+start=1
+# maximum of the number of worker threads
 end=31
 
 setup () {
     mkdir -p results
-    rm ./results/*
+    #rm ./results/*
 }
 
 experiment1 () {
@@ -134,7 +136,7 @@ experiment6() {
   
   ./batch_silo.sh copy_remote_file ./xxxx15/follower-16.log  && mv p1p2.log ./scripts/failure_follower && cp ./xxxx15/leader-16-1000.log ./scripts/failure_leader
 
-  cd ./scripts && python failure_cal.py > ../results/failover-16-throughput.log
+  cd ./scripts && python failure_cal.py > ./results/failover-16-throughput.log
 
   cd $workdir/$repos/
 
@@ -157,16 +159,16 @@ experiment8 () {
   bash ./batch_silo.sh scp
   bash ./batch_silo.sh kill
   bash ./batch_size_exp.sh
-  ag 'agg_throughput: ' xxxx15
+  ag 'agg_throughput: ' xxxx15 > results/batch-throughput.log
 }
 
 
-#setup
-#experiment1
-#experiment2
-#experiment3
-#experiment4
-#experiment5
-#experiment6
+setup
+experiment1
+experiment2
+experiment3
+experiment4
+experiment5
+experiment6
 experiment7
 experiment8
