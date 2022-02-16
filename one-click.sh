@@ -137,14 +137,10 @@ experiment6() {
   
   ./batch_silo.sh copy_remote_file ./xxxx15/follower-16.log  && mv p1p2.log ./scripts/failure_follower && cp ./xxxx15/leader-16-1000.log ./scripts/failure_leader
 
-  cd ./scripts && python failure_cal.py > ./results/failover-16-throughput.log
-
-  cd $workdir/$repos/
-
+  python ./scripts/failure_cal.py > ./results/failover-16-throughput.log
 }
 
 experiment7 () {
-  cd $workdir/$repos/
   echo "start experiment7"
   sudo  bash ./multi-latency.sh
   bash ./batch_silo.sh scp
@@ -154,7 +150,6 @@ experiment7 () {
 }
 
 experiment8 () {
-  cd $workdir/$repos/
   echo "start experiment8"
   sudo  bash ./multi.sh
   bash ./batch_silo.sh scp

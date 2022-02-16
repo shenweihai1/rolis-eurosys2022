@@ -71,10 +71,10 @@ def read_grained(leader, follower):
 
 
 if __name__ == "__main__":
-    with open("./failure_leader") as ll:
+    with open("./scripts/failure_leader") as ll:
         leader = ll.read()
 
-    with open("./failure_follower") as ff:
+    with open("./scripts/failure_follower") as ff:
         follower = ff.read()
 
     # aggregate(leader, follower)
