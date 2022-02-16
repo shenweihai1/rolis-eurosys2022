@@ -97,7 +97,7 @@ python3 scripts/extractor.py 0 silo-only-logs "agg_throughput:" "ops/sec"
 ```bash
 # on the leader replica
 # re-compile
-bash ./multi.sh
+sudo bash ./multi.sh
 
 # kill the running processes on all replicas
 bash ./batch_silo.sh kill
@@ -160,7 +160,7 @@ All numbers in `Figure-11` is  reciprocal of ones from `Figure-10`.
 ### Experiment-6: Failover (Figure-14)
 At first, we recompile it
 ```
-bash ./multi-failover.sh
+sudo  bash ./multi-failover.sh
 bash ./batch_silo.sh kill
 bash ./batch_silo.sh scp
 ```
@@ -172,7 +172,7 @@ we manually modify variable `fail` from false to true to mimic the termination i
 Then, we recompile it again 
 ```bash
 # on the leader replica
-bash ./multi-failover.sh
+sudo  bash ./multi-failover.sh
 ```
 
 * run the experiments on three replicas separately one by one
@@ -216,7 +216,7 @@ In this experiment, we'll fix the number of worker threads while varying the bat
 ```bash
 # on the leader replica
 git checkout benchmarks/bench.cc  # revert the changes made in the fail-over experiment
-bash ./multi-latency.sh
+sudo  bash ./multi-latency.sh
 bash ./batch_silo.sh scp
 bash ./batch_silo.sh kill
 ```
@@ -234,7 +234,7 @@ ag '% latency' xxxx15
 Let's we stop tracking latency and record the throughput of Rolis over different batch-sizes. It's similar to Experiment-7. At first, compile the system
 ```bash
 # on the leader replica
-bash ./multi.sh
+sudo  bash ./multi.sh
 bash ./batch_silo.sh scp
 bash ./batch_silo.sh kill
 ```

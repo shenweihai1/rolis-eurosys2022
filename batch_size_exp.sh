@@ -10,7 +10,7 @@ ulimit -n 10000
 # workdir="~/weihai-projects"
 
 # cleanup logs 
-eval "cd $workdir/$repos/ && rm -rf xxxx15/*"
+eval "cd $workdir/$repos/ && sudo rm -rf xxxx15/*"
 
 batch_size=( 50 100 200 400 800 1600 3200 )
 for i in "${batch_size[@]}"
