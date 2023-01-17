@@ -16,18 +16,41 @@
 #include "../util.h"
 #include "../spinbarrier.h"
 #include "../core.h"
+#include <iomanip>
 
 #include "bench.h"
 
 using namespace std;
 using namespace util;
 
+//#define USING_MIX 1
+
 static size_t nkeys;  // total number of keys
 static const size_t RSimpleRecordSize = 8;  // length of value
 static const size_t RMW_count = 4;  // the updated keys in a RMW transaction
 
 // [R, W, RMW, Scan]
+#ifdef USING_MIX
+static unsigned g_txn_workload_mix[] = { 100 };
+#else
 static unsigned g_txn_workload_mix[] = { 50, 0, 50, 0 };
+#endif
+
+auto get_mint_key(uint64_t output_id) -> std::string {
+    // case1: using stringstream: 32 bytes
+    //auto keystream = std::stringstream();
+    //keystream << std::hex << std::setfill('0') << std::setw(16) << 0;
+    //keystream << std::hex << std::setfill('0') << std::setw(16) << output_id;
+    //return keystream.str();
+
+    // case2: using stringstream: <= 8bytes
+    //auto keystream = std::stringstream();
+    //keystream << output_id;
+    //return keystream.str();
+
+    // case3: using to_string: <= 8bytes
+    return std::to_string(output_id);
+}
 
 class rsimple_worker : public bench_worker {
 public:
@@ -43,6 +66,66 @@ public:
         obj_key0.reserve(str_arena::MinStrReserveLength);
         obj_key1.reserve(str_arena::MinStrReserveLength);
         obj_v.reserve(str_arena::MinStrReserveLength);
+
+        m_keys_per_worker = nkeys / nthreads;
+        m_current_input = worker_id * m_keys_per_worker;
+        m_current_output = 0;
+        m_current_spent_output = 0;
+        std::cout<<"m_keys_per_worker:"<<m_keys_per_worker<<",m_current_input:"<<m_current_input<<std::endl;
+    }
+
+    txn_result
+    txn_swap() 
+    {
+        void * const txn = db->new_txn(txn_flags, arena, txn_buf(), abstract_db::HINT_DEFAULT);
+        scoped_str_arena s_arena(arena);
+
+        uint64_t account0 = ((m_current_input++) % m_keys_per_worker) + (m_keys_per_worker * worker_id);
+        uint64_t account1 = ((m_current_input++) % m_keys_per_worker) + (m_keys_per_worker * worker_id);
+
+        //timer t(true);
+        auto out_key0 = get_mint_key(account0);
+        auto out_key1 = get_mint_key(account1);
+	//ALWAYS_ASSERT(out_key0.length()<=8);
+	//ALWAYS_ASSERT(out_key1.length()<=8);
+        //auto tl = t.lap_nano();
+        //if (account0%100000==0)
+        // std::cout<<tl<<std::endl;
+
+        try {
+            // 2 read and then update 2 of them
+            bool t0=tbl->get(txn, out_key0, obj_v);
+            if (!t0){
+                std::cout<<"it's an error on t0,account0:"<<account0<<",work_id:"<<worker_id<<",m_current_input:"<<m_current_input <<",m_keys_per_worker:"<<m_keys_per_worker<<std::endl;
+                exit(1);
+            }
+            auto acc0_bal = std::stoll(obj_v);
+
+            bool t1=tbl->get(txn, out_key1, obj_v);
+            if (!t1){
+                std::cout<<"it's an error on t1"<<std::endl;
+                exit(1);
+            }
+            auto acc1_bal = std::stoll(obj_v);
+            
+            constexpr auto amt = 1;
+            acc0_bal -= amt;
+            acc1_bal += amt;
+
+            auto acc0_bal_str = std::to_string(acc0_bal);
+            tbl->put(txn, out_key0, acc0_bal_str);
+
+            auto acc1_bal_str = std::to_string(acc1_bal);
+            tbl->put(txn, out_key1, acc1_bal_str);
+
+            computation_n += obj_v.size();
+            if (likely(db->commit_txn(txn))) {
+                return txn_result(true, 0);
+            }
+        } catch (abstract_db::abstract_abort_exception &ex) {
+            db->abort_txn(txn);
+        }
+        return txn_result(false, 0);
     }
 
     txn_result
@@ -122,6 +205,12 @@ public:
         return static_cast<rsimple_worker *>(w)->txn_rmw();
     }
 
+    static txn_result
+    TxnSwap(bench_worker *w)
+    {
+        return static_cast<rsimple_worker *>(w)->txn_swap();
+    }
+
     class worker_scan_callback : public abstract_ordered_index::scan_callback {
     public:
         worker_scan_callback() : n(0) {}
@@ -184,6 +273,9 @@ public:
         for (size_t i = 0; i < ARRAY_NELEMS(g_txn_workload_mix); i++)
             m += g_txn_workload_mix[i];
         ALWAYS_ASSERT(m == 100);
+        #ifdef USING_MIX
+        w.push_back(workload_desc("Swap", 1.0, TxnSwap));
+        #else
         if (g_txn_workload_mix[0])
             w.push_back(workload_desc("Read",  double(g_txn_workload_mix[0])/100.0, TxnRead));
         if (g_txn_workload_mix[1])
@@ -192,6 +284,7 @@ public:
             w.push_back(workload_desc("ReadModifyWrite",  double(g_txn_workload_mix[2])/100.0, TxnRmw));
         if (g_txn_workload_mix[3])
             w.push_back(workload_desc("Scan",  double(g_txn_workload_mix[3])/100.0, TxnScan));
+        #endif
         return w;
     }
 
@@ -220,7 +313,12 @@ private:
     string obj_v;
 
     uint64_t computation_n;
+    uint64_t m_current_input;
+    uint64_t m_keys_per_worker;
+    uint64_t m_current_output{};
+    uint64_t m_current_spent_output{};
 };
+
 
 static void
 rsimple_load_keyrange(
@@ -253,9 +351,15 @@ rsimple_load_keyrange(
                                 keyend : keystart + ((batchid + 1) * batchsize);
             for (size_t i = batchid * batchsize + keystart; i < rend; i++) {
                 ALWAYS_ASSERT(i >= keystart && i < keyend);
+                #ifdef USING_MIX
+                const auto k = get_mint_key(i);
+                const auto v = std::string("1000");
+                tbl->insert(txn, k, v);
+                #else
                 const string k = u64_varkey(i).str();
                 const string v(RSimpleRecordSize, 'a');
                 tbl->insert(txn, k, v);
+                #endif
             }
             if (db->commit_txn(txn))
                 batchid++;
@@ -415,11 +519,19 @@ protected:
         ALWAYS_ASSERT((blockstart % alignment) == 0);
         fast_random r(8544290);
         vector<bench_worker *> ret;
-        for (size_t i = 0; i < nthreads; i++)
-            ret.push_back(
+        for (size_t i = 0; i < nthreads; i++) {
+            #ifdef USING_MIX
+                ret.push_back(
+                    new rsimple_worker(
+                            i, r.next(), db, open_tables,
+                            &barrier_a, &barrier_b));
+            #else
+                ret.push_back(
                     new rsimple_worker(
                             blockstart + i, r.next(), db, open_tables,
                             &barrier_a, &barrier_b));
+            #endif
+        }
         return ret;
     }
 
@@ -523,6 +635,9 @@ rsimple_do_test(abstract_db *db, int argc, char **argv)
 
     rsimple_bench_runner *r = NULL;
     r = new rsimple_bench_runner(db);
+    r->f_mode = 0;
+    r->num_cpus = 80;
+    r->cpu_gap = 1;
     r->run_without_stats() ;
     return r;
 }

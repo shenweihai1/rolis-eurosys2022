@@ -607,7 +607,8 @@ void* PaxosWorker::StartReplayRead(void* arg){
     Marshallable* p;
     auto res = pw->replay_queue.try_dequeue(p);
     if(!res)continue;
-    pw->Next(*p);
+    exit(1);
+    //pw->Next(*p);
   }
 }
 

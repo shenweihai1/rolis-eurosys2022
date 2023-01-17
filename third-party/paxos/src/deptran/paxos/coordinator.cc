@@ -227,7 +227,7 @@ void BulkCoordinatorMultiPaxos::GotoNextPhase() {
       if(phase_ > 3){
         break;
       }
-      Prepare();
+      //Prepare(); // fix leader, We should prepare once instead for every request
       if(!in_submission_){
         break;
       }
@@ -383,15 +383,17 @@ void BulkCoordinatorMultiPaxos::Commit() {
         this->in_submission_ = false;
       }
     });
-    sp_quorum->Wait();
-    if (sp_quorum->Yes()) {
-	//Log_info("Commit: some stuff is committed");
-    } else if (sp_quorum->No()) {
-      in_submission_ = false;
-      return;
-    } else {
-      verify(0);
-    }
+  // commit is async; 
+  // logic is: prepare (once) -> Accept -> Commit (async)
+  //   sp_quorum->Wait();
+  //   if (sp_quorum->Yes()) {
+	// //Log_info("Commit: some stuff is committed");
+  //   } else if (sp_quorum->No()) {
+  //     in_submission_ = false;
+  //     return;
+  //   } else {
+  //     verify(0);
+  //   }
     in_commit = false;
     //verify(phase_ == Phase::COMMIT);
     commit_callback_();

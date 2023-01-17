@@ -1,0 +1,6 @@
+*out-perf*
+*.pyc
+build
+lz4
+*_build*
+*.so

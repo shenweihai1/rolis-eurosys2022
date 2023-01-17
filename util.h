@@ -11,6 +11,7 @@
 #include <atomic>
 #include <tuple>
 #include <algorithm>
+#include <chrono>
 
 #include <stdint.h>
 #include <pthread.h>
@@ -20,6 +21,8 @@
 
 #include "macros.h"
 #include "silo_small_vector.h"
+
+typedef std::chrono::high_resolution_clock Clock;
 
 namespace util {
 
@@ -350,6 +353,11 @@ public:
   {
     lap();
   }
+
+  timer(bool nano)
+  {
+    lap_nano();
+  }
   
   inline void
   init()
@@ -364,6 +372,14 @@ public:
     uint64_t t1 = cur_usec();
     start = t1;
     return t1 - t0;
+  }
+
+  inline uint64_t lap_nano()
+  {
+    auto t0 = start_clock;
+    auto t1 = Clock::now();
+    start_clock = t1;
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
   }
 
   inline double
@@ -383,6 +399,7 @@ public:
 private:
 
   uint64_t start;
+  Clock::time_point start_clock;
 };
 
 class scoped_timer {
