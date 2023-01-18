@@ -49,7 +49,10 @@ auto get_mint_key(uint64_t output_id) -> std::string {
     //return keystream.str();
 
     // case3: using to_string: <= 8bytes
-    return std::to_string(output_id);
+    //return std::to_string(output_id);
+
+    // case4: memcpy 
+    return u64_varkey(output_id).str();
 }
 
 class rsimple_worker : public bench_worker {
