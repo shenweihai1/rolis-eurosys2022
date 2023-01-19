@@ -1243,7 +1243,7 @@ tpcc_worker::txn_result
 tpcc_worker::txn_new_order()
 {
   const uint warehouse_id = PickWarehouseId(r, warehouse_id_start, warehouse_id_end);
-  const uint districtID = RandomNumber(r, 1, 1);
+  const uint districtID = RandomNumber(r, 1, 10);
   const uint customerID = GetCustomerId(r);
   const uint numItems = RandomNumber(r, 5, 15);
   uint itemIDs[15], supplierWarehouseIDs[15], orderQuantities[15];
