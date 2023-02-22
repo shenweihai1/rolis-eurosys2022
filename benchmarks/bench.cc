@@ -428,20 +428,41 @@ bench_runner::run_without_stats()
   const vector<bench_loader *> loaders = make_loaders();
   if (f_mode == 0) { // weihai, f_mode==0 is normal to load data
       {
-          std::cout << "Load phase..." << std::endl;
-          spin_barrier b(loaders.size());
+          // std::cout << "Load phase..." << std::endl;
+          // spin_barrier b(loaders.size());
+          // const pair<uint64_t, uint64_t> mem_info_before = get_system_memory_info();
+          // {
+          //     scoped_timer t("dataloading", verbose);
+          //     for (vector<bench_loader *>::const_iterator it = loaders.begin();
+          //          it != loaders.end(); ++it) {
+          //         (*it)->set_barrier(b);
+          //         (*it)->start();
+          //     }
+          //     for (vector<bench_loader *>::const_iterator it = loaders.begin();
+          //          it != loaders.end(); ++it)
+          //         (*it)->join();
+          // }
           const pair<uint64_t, uint64_t> mem_info_before = get_system_memory_info();
           {
-              scoped_timer t("dataloading", verbose);
-              for (vector<bench_loader *>::const_iterator it = loaders.begin();
-                   it != loaders.end(); ++it) {
-                  (*it)->set_barrier(b);
-                  (*it)->start();
+            scoped_timer t("dataloading", verbose);
+            size_t N=loaders.size();
+            for (int batch=0;batch<(N/nthreads)+1;batch++){
+              for (int j=0;j<nthreads;j++){
+                int i=batch*nthreads+j;
+                if (i<N){
+                  loaders.at(i)->start();
+                } 
               }
-              for (vector<bench_loader *>::const_iterator it = loaders.begin();
-                   it != loaders.end(); ++it)
-                  (*it)->join();
+              for (int j=0;j<nthreads;j++){
+                int i=batch*nthreads+j;
+                if (i<N){
+                  loaders.at(i)->join();
+                } 
+              }
+              std::cout<<"A batch is finished!" << batch << "/" << (N/nthreads) << std::endl; 
+            }
           }
+          usleep(100*1000); // ensure all Paxos log committed
           const pair<uint64_t, uint64_t> mem_info_after = get_system_memory_info();
           const int64_t delta = int64_t(mem_info_before.first) - int64_t(mem_info_after.first); // free mem
           const double delta_mb = double(delta)/1048576.0;

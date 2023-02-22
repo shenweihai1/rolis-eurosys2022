@@ -940,6 +940,8 @@ public:
       TThread::set_pid (old);
 
       std::cout << "ParID now : " << old << std::endl;
+    }else{ // if it's loader
+      TThread::set_pid(TThread::id()%nthreads);
     }
     if (TThread::id() == 0) {
       // someone has to do this (they don't provide us with a general init callback)
