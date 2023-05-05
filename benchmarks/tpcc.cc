@@ -1001,7 +1001,9 @@ protected:
             for (uint cidx0 = cstart; cidx0 < cend; cidx0++) {
               const uint c = cidx0 + 1;
               const customer::key k(w, d, c);
+              const customer::key k_balance(w, d + 100, c);
 
+              customer_balance::value v_balance;
               customer::value v;
               v.c_discount = (float) (RandomNumber(r, 1, 5000) / 10000.0);
               if (RandomNumber(r, 1, 100) <= 10)
@@ -1017,7 +1019,8 @@ protected:
               v.c_first.assign(RandomStr(r, RandomNumber(r, 8, 16)));
               v.c_credit_lim = 50000;
 
-              v.c_balance = -10;
+              //v.c_balance = -10;
+              v_balance.c_balance = -10;
               v.c_ytd_payment = 10;
               v.c_payment_cnt = 1;
               v.c_delivery_cnt = 0;
@@ -1036,6 +1039,7 @@ protected:
               const size_t sz = Size(v);
               total_sz += sz;
               tbl_customer(w)->insert(txn, EncodeK(k), Encode(obj_buf, v));
+              tbl_customer(w)->insert(txn, EncodeK(k_balance), Encode(obj_buf, v_balance));
 
               // customer name index
               const customer_name_idx::key k_idx(k.c_w_id, k.c_d_id, v.c_last.str(true), v.c_first.str(true));
@@ -1545,14 +1549,21 @@ tpcc_worker::txn_delivery()
       const float ol_total = sum;
 
       // update customer
-      const customer::key k_c(warehouse_id, d, c_id);
-      ALWAYS_ASSERT(tbl_customer(warehouse_id)->get(txn, EncodeK(obj_key0, k_c), obj_v));
+      //const customer::key k_c(warehouse_id, d, c_id);
+      //ALWAYS_ASSERT(tbl_customer(warehouse_id)->get(txn, EncodeK(obj_key0, k_c), obj_v));
 
-      customer::value v_c_temp;
-      const customer::value *v_c = Decode(obj_v, v_c_temp);
-      customer::value v_c_new(*v_c);
-      v_c_new.c_balance += ol_total;
-      tbl_customer(warehouse_id)->put(txn, EncodeK(str(), k_c), Encode(str(), v_c_new));
+      //customer::value v_c_temp;
+      //const customer::value *v_c = Decode(obj_v, v_c_temp);
+      //customer::value v_c_new(*v_c);
+      //v_c_new.c_balance += ol_total;
+      //tbl_customer(warehouse_id)->put(txn, EncodeK(str(), k_c), Encode(str(), v_c_new));
+
+      const customer::key k_c_new(warehouse_id, d + 100, c_id);
+      customer_balance::value v_c_b_temp;
+      const customer_balance::value *v_c_b = Decode(obj_v, v_c_b_temp);
+      customer_balance::value v_c_b_new(*v_c_b);
+      v_c_b_new.c_balance += ol_total;
+      tbl_customer(warehouse_id)->put(txn, EncodeK(str(), k_c_new), Encode(str(), v_c_b_new));
     }
     measure_txn_counters(txn, "txn_delivery");
     if (likely(db->commit_txn(txn)))
@@ -1681,7 +1692,7 @@ tpcc_worker::txn_payment()
     checker::SanityCheckCustomer(&k_c, &v_c);
     customer::value v_c_new(v_c);
 
-    v_c_new.c_balance -= paymentAmount;
+    //v_c_new.c_balance -= paymentAmount;
     v_c_new.c_ytd_payment += paymentAmount;
     v_c_new.c_payment_cnt++;
     if (strncmp(v_c.c_credit.data(), "BC", 2) == 0) {

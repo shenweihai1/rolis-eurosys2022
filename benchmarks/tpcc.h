@@ -51,7 +51,6 @@ inline customer_key EncodeK(std::string&, const customer_key& k) {
   y(inline_str_8<16>,c_last) \
   y(inline_str_8<16>,c_first) \
   y(float,c_credit_lim) \
-  y(float,c_balance) \
   y(float,c_ytd_payment) \
   y(int32_t,c_payment_cnt) \
   y(int32_t,c_delivery_cnt) \
@@ -69,6 +68,14 @@ DO_STRUCT2(customer, customer_key, CUSTOMER_VALUE_FIELDS)
 #else 
 DO_STRUCT(customer, CUSTOMER_KEY_FIELDS, CUSTOMER_VALUE_FIELDS)
 #endif
+
+#define CUSTOMER_BALANCE_KEY_FIELDS(x, y) \
+  x(int32_t,c_w_id) \
+  y(int32_t,c_d_id) \
+  y(int32_t,c_id)
+#define CUSTOMER_BALANCE_VALUE_FIELDS(x, y) \
+	x(float,c_balance)
+DO_STRUCT(customer_balance, CUSTOMER_BALANCE_KEY_FIELDS, CUSTOMER_BALANCE_VALUE_FIELDS)
 
 #define CUSTOMER_NAME_IDX_KEY_FIELDS(x, y) \
   x(int32_t,c_w_id) \

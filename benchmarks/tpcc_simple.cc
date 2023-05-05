@@ -823,7 +823,7 @@ protected:
               v.c_first.assign(RandomStr(r, RandomNumber(r, 8, 16)));
               v.c_credit_lim = 50000;
 
-              v.c_balance = -10;
+              //v.c_balance = -10;
               v.c_ytd_payment = 10;
               v.c_payment_cnt = 1;
               v.c_delivery_cnt = 0;
@@ -1088,7 +1088,7 @@ tpcc_worker::txn_update_customer()
     customer::value v_c_temp;
     const customer::value *v_c = Decode(obj_v, v_c_temp);
     customer::value v_c_new(*v_c);
-    v_c_new.c_balance += 10;
+    //v_c_new.c_balance += 10;
     tbl_customer(warehouse_id)->put(txn, EncodeK(str(), k_c), Encode(str(), v_c_new));
   
     if (likely(db->commit_txn(txn)))
