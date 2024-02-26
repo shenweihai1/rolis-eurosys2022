@@ -456,8 +456,8 @@ void add_log_to_nc(const char* log, int len, uint32_t par_id){
 }
 
 void* PollSubQNc(void* arg){
-   while(true){
-     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+   while(false && true){
+     std::this_thread::sleep_for(std::chrono::seconds(100));
      l_.lock();
      //Log_info("Clearing queue of size %d", submit_queue_nc.size());
      int deleted = 0;
